@@ -79,8 +79,9 @@ function renderActivityCalendar() {
     const activity = AppState.user.activity;
     const daySquares = [];
     
-    for (let week = 0; week < weeks; week++) {
-        for (let dayOfWeek = 0; dayOfWeek < daysInWeek; dayOfWeek++) {
+    // GitHub-style: сначала дни недели (строки), потом недели (колонки)
+    for (let dayOfWeek = 0; dayOfWeek < daysInWeek; dayOfWeek++) {
+        for (let week = 0; week < weeks; week++) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + (week * 7) + dayOfWeek);
             

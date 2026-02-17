@@ -127,6 +127,9 @@ async function loadPage(pageName) {
         content.style.animation = 'fadeSlide 0.3s ease';
         
         switch(pageName) {
+            case 'library':
+                if (typeof initLibraryPage === 'function') initLibraryPage();
+                break;
             case 'home':
                 if (typeof initHomePage === 'function') initHomePage();
                 break;

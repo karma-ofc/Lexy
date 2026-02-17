@@ -1,90 +1,110 @@
+// Тестовые карточки для демо
+const demoCards = [
+    { front: 'Hello', back: 'Привет' },
+    { front: 'Goodbye', back: 'До свидания' },
+    { front: 'Thank you', back: 'Спасибо' },
+    { front: 'Please', back: 'Пожалуйста' },
+    { front: 'How are you?', back: 'Как дела?' }
+];
+
+let currentDemoCardIndex = 0;
+let isDemoCardFlipped = false;
+
+// Инициализация домашней страницы
 function initHomePage() {
-    renderRecommendedDecks();
-    renderPopularDecks();
-    renderNewDecks();
+    currentDemoCardIndex = 0;
+    isDemoCardFlipped = false;
+    updateDemoCard();
 }
 
-function renderRecommendedDecks() {
-    const container = document.getElementById('recommendedDecks');
-    if (!container) return;
+// Обновить отображение демо карточки
+function updateDemoCard() {
+    const card = document.getElementById('demoCard');
+    const front = document.getElementById('demoCardFront');
+    const back = document.getElementById('demoCardBack');
+    const progress = document.getElementById('demoProgressText');
     
-    container.innerHTML = AppState.publicDecks.slice(0, 4).map(deck => `
-        <div class="deck-card" onclick="addPublicDeck('${deck.id}')">
-            <div class="deck-preview" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover));">
-                <div class="deck-actions">
-                    <button class="btn-icon">+</button>
-                </div>
-            </div>
-            <div class="deck-info">
-                <div class="deck-name">${deck.name}</div>
-                <div class="deck-meta">${deck.cardsCount} карт • ${deck.lang}</div>
-            </div>
-        </div>
-    `).join('');
+    if (!card || !front || !back || !progress) return;
+    
+    const currentCard = demoCards[currentDemoCardIndex];
+    front.textContent = currentCard.front;
+    back.textContent = currentCard.back;
+    progress.textContent = `${currentDemoCardIndex + 1} / ${demoCards.length}`;
+    
+    // Сбросить состояние переворота
+    card.classList.remove('flipped');
+    isDemoCardFlipped = false;
 }
 
-function renderPopularDecks() {
-    const container = document.getElementById('popularDecks');
-    if (!container) return;
-    
-    container.innerHTML = AppState.publicDecks.slice(2, 6).map(deck => `
-        <div class="deck-card" onclick="addPublicDeck('${deck.id}')">
-            <div class="deck-preview" style="background: linear-gradient(135deg, #ff9f0a, #ff6b0a);">
-                <div class="deck-actions">
-                    <button class="btn-icon">+</button>
-                </div>
-            </div>
-            <div class="deck-info">
-                <div class="deck-name">${deck.name}</div>
-                <div class="deck-meta">${deck.cardsCount} карт • ${deck.lang}</div>
-            </div>
-        </div>
-    `).join('');
+// Перевернуть демо карточку
+function flipDemoCard() {
+    const card = document.getElementById('demoCard');
+    if (card) {
+        card.classList.toggle('flipped');
+        isDemoCardFlipped = !isDemoCardFlipped;
+    }
 }
 
-function renderNewDecks() {
-    const container = document.getElementById('newDecks');
-    if (!container) return;
+// Следующая демо карточка
+function nextDemoCard() {
+    currentDemoCardIndex++;
+    if (currentDemoCardIndex >= demoCards.length) {
+        currentDemoCardIndex = 0;
+    }
+    updateDemoCard();
     
-    container.innerHTML = AppState.publicDecks.slice(0, 3).map(deck => `
-        <div class="deck-card" onclick="addPublicDeck('${deck.id}')">
-            <div class="deck-preview" style="background: linear-gradient(135deg, #34c759, #30b753);">
-                <div class="deck-actions">
-                    <button class="btn-icon">+</button>
-                </div>
-            </div>
-            <div class="deck-info">
-                <div class="deck-name">${deck.name}</div>
-                <div class="deck-meta">${deck.cardsCount} карт • ${deck.lang}</div>
-            </div>
-        </div>
-    `).join('');
+    // Прокрутка к секции демо
+    const demoSection = document.getElementById('demoCards');
+    if (demoSection) {
+        demoSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
-function addPublicDeck(deckId) {
-    const deck = AppState.publicDecks.find(d => d.id === deckId);
-    if (!deck) return;
+// Начать демо карточки
+function startDemoCards() {
+    const demoSection = document.getElementById('demoCards');
+    if (demoSection) {
+        demoSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// Обработка регистрации
+function handleRegister(event) {
+    event.preventDefault();
     
-    if (!canCreateDeck()) {
-        showNotification('Слишком много созданий колод. Подождите час', 'error');
+    const name = document.getElementById('regName').value;
+    const username = document.getElementById('regUsername').value;
+    const password = document.getElementById('regPassword').value;
+    
+    if (!name || !username || !password) {
+        showNotification('Пожалуйста, заполните все поля', 'error');
         return;
     }
     
-    AppState.deckCreateTimes.push(Date.now());
-    
-    const newDeck = {
-        id: 'deck_' + Date.now(),
-        name: deck.name,
-        cards: [],
-        createdAt: new Date().toISOString(),
-        isFavorite: false,
-        source: 'public'
-    };
-    
-    AppState.userDecks.push(newDeck);
+    // Сохраняем данные пользователя
+    AppState.user.name = name;
+    AppState.user.username = username;
+    AppState.user.isRegistered = true;
     saveState();
     
-    showNotification('Колода добавлена в Мои колоды');
+    showNotification('Аккаунт создан! Добро пожаловать в Lexy!');
+    
+    // Перенаправляем на профиль
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-tab="profile"]').classList.add('active');
+    loadPage('profile');
 }
 
-window.addPublicDeck = addPublicDeck;
+// Переход на профиль
+function goToProfile() {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-tab="profile"]').classList.add('active');
+    loadPage('profile');
+}
+
+// Экспорт функций в глобальную область видимости
+window.startDemoCards = startDemoCards;
+window.flipDemoCard = flipDemoCard;
+window.nextDemoCard = nextDemoCard;
+window.handleRegister = handleRegister;
+window.goToProfile = goToProfile;
